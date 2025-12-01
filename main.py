@@ -1,5 +1,7 @@
 import os
-# --- KONFIGURACE (MacBook) ---
+# --- KONFIGURACE (MacBook / Dev) ---
+# Poznámka: Na Raspberry Pi pro Kiosk mód tyto řádky buď smažte,
+# nebo Kivy automaticky přepne na fullscreen, pokud je spuštěno správně.
 from kivy.config import Config
 Config.set('graphics', 'resizable', False)
 Config.set('graphics', 'width', '1280')
@@ -12,13 +14,18 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.uix.modalview import ModalView
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.relativelayout import RelativeLayout
 from kivy.properties import StringProperty, ListProperty, BooleanProperty, NumericProperty, ObjectProperty
 from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.clock import Clock
+from kivy.metrics import dp, sp
 from kivy.animation import Animation
 
-# --- TEXTY ---
+# ==========================================
+# TEXTY A OBSAH
+# ==========================================
+
 TEXT_KAREL_SKODA = (
     "Byl synem zakladatele Škodových závodů, Emila Škody. Po smrti otce nebyl jmenován "
     "generálním ředitelem závodu, protože byl považován za slabého. V roce 1907 byl po "
@@ -40,7 +47,6 @@ TEXT_KARLOV_INTRO = (
     "čtvrtě inicializoval."
 )
 
-# --- TEXTY B1 ---
 TEXT_B1_INTRO = (
     "Vznik Karlova byl problematický. Čtvrť pro své zaměstnance chtěla Škoda umístit na "
     "katastr obce Skvrňany. Ty s tím však nesouhlasili, a tak byl Karlov stavěn na západním "
@@ -50,7 +56,6 @@ TEXT_B1A = "Karlov stavěla firma Müller a Kapsa z Plzně v letech 1910-1912. P
 TEXT_B1B = "Bylo postaveno 217 domů s 594 byty. Domy byly navrženy do otevřených řad s jednoduchou výzdobou a čtyřmi velikostmi bytů, což odráželo hierarchii zaměstnanců."
 TEXT_B1C = "Letecký snímek Karlova ukazuje unikátní urbanistické řešení. (Kliknutím na obrázek v bublině můžete porovnat historický stav se současným pohledem)."
 
-# --- TEXTY B2 ---
 TEXT_B2_INTRO = (
     "Karlov byl svébytná čtvrť, která byla poměrně odříznutá od zbytku města. Lidé tu tak žili "
     "pospolu a naučili se zpříjemnit si život. Bylo tu slavné fotbalové družstvo, mnoho kroužků "
@@ -61,7 +66,6 @@ TEXT_B2A = "Školní budova na Karlově od architektů Josefa Farkače a Hanuše
 TEXT_B2B = "Lidový dům byl postaven svépomocí a byl epicentrem kultury. Byly tu přednášky, kroužky, divadlo a soutěže."
 TEXT_B2C = "Fotbal a sport se odehrával na místním hřišti. Součástí byla budova s restaurací, která je na Karlově dodnes."
 
-# --- TEXTY B3 ---
 TEXT_B3_INTRO = (
     "Karlov zanikl nadvakrát. Nejdříve byl zasažen třemi většími nálety v době druhé světové války. "
     "Nejvíce utrpěl při náletu v dubnu 1945. Podruhé zanikl kvůli neuskutečněnému plánu na "
@@ -71,11 +75,50 @@ TEXT_B3A = "Nálety za druhé světové války poničily nejen Škodovku, ale i 
 TEXT_B3B = "Na počátku sedmdesátých let 20. století bylo rozhodnuto o zástavbě Karlova halami těžkého strojírenství. Plán se realizoval pomalu a demolice proběhla v několika etapách."
 
 
-# --- TŘÍDA PRO BLOK GALERIE ---
+# ==========================================
+# POMOCNÉ TŘÍDY A MIXINS
+# ==========================================
+
 class GalleryBlock(BoxLayout):
     img_source = StringProperty('')
     text_content = StringProperty('')
     click_action = ObjectProperty(None) 
+
+# Mixin třída pro automatické zavírání popupů
+class AutoCloseBehavior:
+    timer_event = None
+    
+    def on_open(self):
+        # Spustíme odpočet při otevření
+        self.reset_timer()
+        # Pokud dědí z něčeho co má on_open, zavoláme to taky
+        if hasattr(super(), 'on_open'):
+            super().on_open()
+
+    def reset_timer(self):
+        # Zrušíme starý, nastavíme nový na 10 vteřin
+        if self.timer_event:
+            self.timer_event.cancel()
+        self.timer_event = Clock.schedule_once(self.dismiss, 10)
+
+    def on_dismiss(self):
+        # Úklid timeru při zavření
+        if self.timer_event:
+            self.timer_event.cancel()
+            self.timer_event = None
+        if hasattr(super(), 'on_dismiss'):
+            super().on_dismiss()
+    
+    def on_touch_down(self, touch):
+        # Pokud se uživatel dotkne okna, resetujeme časovač (prodloužíme čtení)
+        if self.collide_point(*touch.pos):
+            self.reset_timer()
+        return super().on_touch_down(touch)
+
+
+# ==========================================
+# OBRAZOVKY (SCREENS)
+# ==========================================
 
 class MainMenu(Screen):
     pass
@@ -86,41 +129,65 @@ class SectionA(Screen):
         popup = DetailPopup(title=title, img_source=image_path, desc_text=description)
         popup.open()
 
+# --- SEKCE B (Upravená slideshow) ---
 class SectionB(Screen):
     text_content = StringProperty(TEXT_KARLOV_INTRO)
-    # VŠECHNY OBRÁZKY PRO SLIDESHOW
+    
+    # Seznam obrázků
     slide_images = ListProperty([
-        "assets/Karlov.jpg", "assets/A1.jpg", "assets/A2.jpg", "assets/A3.jpg", 
+        "assets/A1.jpg", "assets/A2.jpg", "assets/A3.jpg", 
         "assets/A4.jpg", "assets/A5.jpg", "assets/A6.jpg", "assets/A7.jpg",
         "assets/Ba.jpg", "assets/Bb.jpg", "assets/Bc.jpg",
         "assets/B1a.jpg", "assets/B1b.jpg", "assets/B1c.jpg",
         "assets/B2a.jpg", "assets/B2b1.jpg", "assets/B2c2.jpg",
         "assets/B3a.jpg", "assets/Soucasnost.jpg"
     ])
-    current_slide_index = 0
+    
+    # Použijeme NumericProperty, aby si Kivy pamatovalo stav i při změně obrazovky
+    current_slide_index = NumericProperty(0)
 
     def on_enter(self):
-        if self.slide_images and os.path.exists(self.slide_images[0]):
-             self.ids.slideshow_image.source = self.slide_images[0]
+        # Pokud nejsou obrázky, končíme
+        if not self.slide_images: return
+
+        # Zkontrolujeme, zda je index stále platný (pro jistotu)
+        if self.current_slide_index >= len(self.slide_images):
+            self.current_slide_index = 0
+
+        # Získáme cestu k AKTUÁLNÍMU obrázku (tam, kde jsme minule skončili)
+        current_img_path = self.slide_images[self.current_slide_index]
+        
+        # Nastavíme obrázek bez animace (okamžitě po vstupu)
+        if os.path.exists(current_img_path):
+             self.ids.slideshow_image.source = current_img_path
              self.ids.slideshow_image.opacity = 1
+        
+        # Spustíme časovač, který bude pokračovat v rotaci po 4 sekundách
         self.event = Clock.schedule_interval(self.rotate_slide, 4.0)
 
     def rotate_slide(self, dt):
         if not self.slide_images: return
+        
+        # Posuneme index o jedna
         self.current_slide_index = (self.current_slide_index + 1) % len(self.slide_images)
         next_image_path = self.slide_images[self.current_slide_index]
+        
         if not os.path.exists(next_image_path): return
 
+        # Animace prolnutí
         img_widget = self.ids.slideshow_image
         anim_out = Animation(opacity=0, duration=0.5, t='out_quad')
+        
         def on_fade_out_complete(animation, widget):
             widget.source = next_image_path
             anim_in = Animation(opacity=1, duration=0.5, t='in_quad')
             anim_in.start(widget)
+            
         anim_out.bind(on_complete=on_fade_out_complete)
         anim_out.start(img_widget)
 
     def on_leave(self):
+        # Zastavíme jen časovač, ale index (current_slide_index) si pamatujeme
         if hasattr(self, 'event'): self.event.cancel()
 
 # --- SEKCE B1 ---
@@ -131,7 +198,6 @@ class SectionB1(Screen):
     desc_b1c = StringProperty(TEXT_B1C)
 
     def show_timed_popup(self, title, img_1, img_2=None):
-        # Už neposíláme description, protože ho v popupu nechceme
         popup = TimedDetailPopup(
             title=title, 
             img_source=img_1, 
@@ -168,55 +234,61 @@ class SectionB3(Screen):
         )
         popup.open()
 
-# --- POPUPY ---
-class DetailPopup(ModalView):
+# ==========================================
+# POPUPY (S AUTOMATICKÝM ZAVÍRÁNÍM)
+# ==========================================
+
+class DetailPopup(AutoCloseBehavior, ModalView):
     title = StringProperty("")
     img_source = StringProperty("")
     desc_text = StringProperty("")
 
-class TimedDetailPopup(ModalView):
+class TimedDetailPopup(AutoCloseBehavior, ModalView):
     title = StringProperty("")
     img_source = StringProperty("")   
-    # desc_text odstraněn, není potřeba
     
     img_source_main = StringProperty("") 
     img_source_2 = StringProperty("")   
     is_showing_main = BooleanProperty(True)
     
-    timeout_event = None
-    time_remaining = NumericProperty(10)
-
     def on_open(self):
+        # Voláme rodiče (AutoCloseBehavior) pro start timeru
+        super().on_open()
+        # Uložíme hlavní fotku
         self.img_source_main = self.img_source
-        self.timeout_event = Clock.schedule_interval(self.update_timer, 1.0)
-    
-    def update_timer(self, dt):
-        self.time_remaining -= 1
-        if self.time_remaining <= 0:
-            self.dismiss()
-
-    def reset_timer(self):
-        self.time_remaining = 10
+        self.is_showing_main = True
 
     def toggle_image(self):
+        # Při interakci resetujeme časovač
         self.reset_timer()
+        
         if self.is_showing_main:
             self.img_source = self.img_source_2
             self.is_showing_main = False
         else:
             self.img_source = self.img_source_main
             self.is_showing_main = True
-
+            
     def on_dismiss(self):
-        if self.timeout_event:
-            self.timeout_event.cancel()
+        # Voláme rodiče pro úklid timeru
+        super().on_dismiss()
+        # Reset stavu obrázku při zavření
+        if self.img_source_main:
+             self.img_source = self.img_source_main
+             self.is_showing_main = True
+
+# ==========================================
+# HLAVNÍ APLIKACE
+# ==========================================
 
 class KarlovApp(App):
     def build(self):
         if os.path.exists('design.kv'):
             Builder.load_file('design.kv')
 
+        # Pro Kiosk na RPi by mělo být False, pro ladění True
         Window.show_cursor = True 
+        
         sm = ScreenManager(transition=FadeTransition(duration=0.5))
         sm.add_widget(MainMenu(name='menu'))
         sm.add_widget(SectionA(name='section_a'))
