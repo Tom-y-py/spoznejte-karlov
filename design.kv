@@ -81,7 +81,9 @@
     size_hint_y: None
     height: dp(600) 
     spacing: dp(15)
-    padding: [dp(20), dp(10), dp(20), dp(20)]
+    # ZMĚNA: Odstraněn levý a pravý padding (nuly na začátku a třetím místě),
+    # aby byla šířka stejná jako u úvodního textu.
+    padding: [0, dp(10), 0, dp(20)]
     
     Card:
         size_hint: 1, 1
@@ -103,7 +105,6 @@
                     keep_ratio: True
                     fit_mode: "cover" 
                     
-                    # Ořez obrázku pro horní rohy
                     canvas.before:
                         StencilPush
                         RoundedRectangle:
@@ -126,7 +127,8 @@
                     bold: True
                     size_hint: None, None
                     size: dp(60), dp(60)
-                    pos_hint: {'right': 0.95, 'bottom': 0.05}
+                    # ZMĚNA: Zvednuto od spodku (y: 0.08 místo bottom: 0.05)
+                    pos_hint: {'right': 0.95, 'y': 0.08}
                     color: hex('#d4af37')
                     canvas.before:
                         Color:
@@ -150,7 +152,6 @@
     img_source: ''
     title_text: ''
     
-    # 1. DEFINICE PLÁTNA (Canvas)
     canvas.before:
         # Stín
         Color:
@@ -184,7 +185,6 @@
             width: dp(2)
             rounded_rectangle: (self.x, self.y, self.width, self.height, dp(15))
 
-    # 2. DĚTSKÉ PRVKY
     Image:
         source: root.img_source
         allow_stretch: True
@@ -317,7 +317,6 @@
                         padding: dp(10)
                         spacing: dp(5)
                         
-                        # Zde jsme přidali ClickableImageContainer pro rozkliknutí
                         ClickableImageContainer:
                             size_hint_y: 0.85
                             on_release: root.show_detail("Emil a Karel Škodovi", "assets/A1.jpg", "Dobová fotografie zachycující zakladatele Emila Škodu se synem Karlem.")
@@ -326,7 +325,6 @@
                                 source: 'assets/A1.jpg'
                                 fit_mode: "contain"
                                 
-                            # Ikonka lupy (aby uživatel věděl, že může kliknout)
                             Label:
                                 text: "+"
                                 font_size: sp(20)
@@ -389,7 +387,6 @@
                         font_size: sp(16)
                         on_release: root.show_detail("Planetárium", "assets/A7.jpg", "Budova dnešního planetária je další z významných staveb v areálu.")
         
-        # Navigace dole (Barva změněna na světlejší šedou #757575)
         NavButton:
             text: "< Na začátek"
             pos_hint: {'x': 0.05, 'y': 0.03}
@@ -411,7 +408,6 @@
             size: self.size
             
     FloatLayout:
-        # Nadpis
         Label:
             text: "Čtvrť Karlov"
             font_size: sp(40)
@@ -422,7 +418,6 @@
             halign: 'left'
             text_size: self.size
             
-        # Text popisu
         Label:
             text: root.text_content
             text_size: self.width, None
@@ -433,7 +428,6 @@
             font_size: sp(22)
             pos_hint: {'x': 0.05, 'top': 0.83}
         
-        # Slideshow
         Card:
             size_hint: 0.35, 0.45
             pos_hint: {'right': 0.95, 'top': 0.95}
@@ -445,7 +439,6 @@
                 pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                 radius: [dp(10), dp(10), dp(10), dp(10)]
                 
-        # Spodní dlaždice (Menu)
         BoxLayout:
             orientation: 'horizontal'
             spacing: dp(30)
@@ -465,7 +458,6 @@
                 img_source: 'assets/Bc.jpg'
                 on_release: app.root.current = 'section_b3'
         
-        # Navigace (Tlačítka dole - barva změněna na #757575)
         BoxLayout:
             orientation: 'horizontal'
             spacing: dp(20)
@@ -499,9 +491,10 @@
             size_hint: 1, 0.1
             pos_hint: {'top': 1}
         
+        # ZMĚNA: ScrollView posunutý níže (top: 0.88), aby byl odstup od nadpisu
         ScrollView:
-            size_hint: 0.9, 0.82
-            pos_hint: {'center_x': 0.5, 'top': 0.92}
+            size_hint: 0.9, 0.78
+            pos_hint: {'center_x': 0.5, 'top': 0.88}
             bar_width: dp(10)
             bar_color: hex('#d4af37')
             
@@ -512,7 +505,6 @@
                 spacing: dp(30)
                 padding: [dp(20), dp(20), dp(20), dp(50)]
 
-                # Úvodní text v Kartě
                 Card:
                     size_hint_y: None
                     height: intro_lbl.texture_size[1] + dp(40)
@@ -542,7 +534,6 @@
                     text_content: root.desc_b1c
                     click_action: lambda: root.show_timed_popup("Proměna Karlova", "assets/B1c.jpg", "assets/Soucasnost.jpg")
 
-        # Navigace
         BoxLayout:
             orientation: 'horizontal'
             size_hint: 1, 0.1
@@ -567,7 +558,6 @@
             Widget: 
                 size_hint_x: 1 
             
-            # Barva změněna na #757575
             NavButton:
                 text: "Zpět na rozcestník"
                 my_bg_color: hex('#757575')
@@ -591,9 +581,10 @@
             size_hint: 1, 0.1
             pos_hint: {'top': 1}
         
+        # ZMĚNA: ScrollView posunutý níže (top: 0.88)
         ScrollView:
-            size_hint: 0.9, 0.82
-            pos_hint: {'center_x': 0.5, 'top': 0.92}
+            size_hint: 0.9, 0.78
+            pos_hint: {'center_x': 0.5, 'top': 0.88}
             bar_width: dp(10)
             bar_color: hex('#d4af37')
             
@@ -654,7 +645,6 @@
                 on_release: app.root.current = 'menu'
             Widget: 
                 size_hint_x: 1 
-            # Barva změněna na #757575
             NavButton:
                 text: "Zpět na rozcestník"
                 my_bg_color: hex('#757575')
@@ -679,8 +669,8 @@
             pos_hint: {'top': 1}
         
         ScrollView:
-            size_hint: 0.9, 0.82
-            pos_hint: {'center_x': 0.5, 'top': 0.92}
+            size_hint: 0.9, 0.78
+            pos_hint: {'center_x': 0.5, 'top': 0.88}
             bar_width: dp(10)
             bar_color: hex('#d4af37')
             
@@ -704,15 +694,19 @@
                         pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                         font_size: sp(22)
 
+                # --- 1. GALERIE: Nálety (B3a.jpg) - bez přepínání ---
                 GalleryBlock:
                     img_source: 'assets/B3a.jpg'
                     text_content: root.desc_b3a
-                    click_action: lambda: root.show_timed_popup("Nálety (1945)", "assets/B3a.jpg", "assets/B3b.jpg")
+                    # Voláme popup pouze s jedním obrázkem
+                    click_action: lambda: root.show_timed_popup("Nálety (1945)", "assets/B3a.jpg")
 
+                # --- 2. GALERIE: Zástavba (B3b.jpg) - bez přepínání ---
                 GalleryBlock:
-                    img_source: 'assets/B3c.jpg'
+                    img_source: 'assets/B3b.jpg'
                     text_content: root.desc_b3b
-                    click_action: lambda: root.show_timed_popup("Demolice (80. léta)", "assets/B3c.jpg", "assets/B3d.jpg")
+                    # Voláme popup pouze s jedním obrázkem
+                    click_action: lambda: root.show_timed_popup("Zástavba Karlova", "assets/B3b.jpg")
 
         BoxLayout:
             orientation: 'horizontal'
@@ -736,7 +730,6 @@
                 on_release: app.root.current = 'menu'
             Widget: 
                 size_hint_x: 1 
-            # Barva změněna na #757575
             NavButton:
                 text: "Zpět na rozcestník"
                 my_bg_color: hex('#757575')
@@ -761,14 +754,23 @@
                 anchor_y: 'top'
                 size_hint_y: 0.1
                 padding: dp(10)
+                
+                # ZMĚNA: Zaoblené tlačítko X
                 Button: 
                     text: "X"
                     size_hint: None, None
                     size: dp(60), dp(60)
+                    background_color: 0, 0, 0, 0 # Průhledné pozadí
                     background_normal: ''
-                    background_color: hex('#cc0000')
                     bold: True
                     on_release: root.dismiss()
+                    canvas.before:
+                        Color:
+                            rgba: hex('#cc0000')
+                        # Kruh (Ellipse)
+                        Ellipse:
+                            pos: self.pos
+                            size: self.size
             
             Image: 
                 source: root.img_source
@@ -786,11 +788,20 @@
 
 <TimedDetailPopup>:
     size_hint: 1, 1
-    auto_dismiss: True
+    auto_dismiss: True 
     background_color: 0, 0, 0, 0.9 
 
     FloatLayout:
-        # Obrázek
+        # 1. NEVIDITELNÉ TLAČÍTKO NA POZADÍ
+        Button:
+            text: ""
+            background_color: 0, 0, 0, 0
+            background_normal: ''
+            size_hint: 1, 1
+            pos_hint: {'x': 0, 'y': 0}
+            on_release: root.dismiss()
+
+        # 2. Samotný obrázek
         Image:
             id: content_img
             source: root.img_source
@@ -799,7 +810,7 @@
             size_hint: 0.9, 0.9
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
-        # Tlačítko PŘEPNOUT
+        # 3. Tlačítko PŘEPNOUT
         Button:
             text: "PŘEPNOUT POHLED" if root.img_source_2 else ""
             opacity: 1 if root.img_source_2 else 0
@@ -812,13 +823,19 @@
             bold: True
             on_release: root.toggle_image()
 
-        # Tlačítko ZAVŘÍT
+        # 4. Tlačítko ZAVŘÍT (Zaoblené X)
         Button:
             text: "X"
             size_hint: None, None
             size: dp(60), dp(60)
             pos_hint: {'right': 0.98, 'top': 0.98}
+            background_color: 0, 0, 0, 0 # Průhledné pozadí
             background_normal: ''
-            background_color: hex('#cc0000')
             bold: True
             on_release: root.dismiss()
+            canvas.before:
+                Color:
+                    rgba: hex('#cc0000')
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
