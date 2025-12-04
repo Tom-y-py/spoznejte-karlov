@@ -213,14 +213,11 @@ class KarlovApp(App):
 
     def build(self):
         # 1. REGISTRACE FONTŮ
-        # Zde říkáme Kivy: "Když někdo chce font 'Roboto', použij tyto soubory."
-        # Pokud nastavíš bold: True, Kivy automaticky sáhne po fn_bold.
         LabelBase.register(name='Roboto', 
                            fn_regular=resource_path('assets/fonts/Roboto-Regular.ttf'),
                            fn_bold=resource_path('assets/fonts/Roboto-Bold.ttf'))
 
         # 2. PRELOADING OBRÁZKŮ
-        # Načteme obrázky do cache, aby se neškubaly při prvním zobrazení
         self.preload_images()
 
         kv_path = resource_path('design.kv')
@@ -245,20 +242,16 @@ class KarlovApp(App):
         """Načte klíčové obrázky do paměti při startu"""
         images_to_load = [
             "assets/A1.jpg", "assets/Soucasnost.jpg",
-            # + další z slideshow, pokud je to nutné, ale hlavní je ten první
         ]
-        # Přidáme obrázky z slideshow sekce B
         screen_b = SectionB()
         images_to_load.extend(screen_b.slide_images)
         
-        # Odstraníme duplicity
         images_to_load = list(set(images_to_load))
 
         print("Načítám obrázky do cache...")
         for img_rel_path in images_to_load:
             full_path = resource_path(img_rel_path)
             if os.path.exists(full_path):
-                # CoreImage načte texturu do paměti
                 CoreImage(full_path)
 
     def on_user_activity(self, window, etype, motionevent):
