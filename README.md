@@ -1,4 +1,4 @@
-# Spoznejte Karlov - Interaktivní Exponát
+# Poznejte Karlov - Interaktivní Exponát
 
 Aplikace pro dotykový kiosek běžící na Raspberry Pi 5. Seznamuje návštěvníky s osobností Karla Škody a historií čtvrti Karlov.
 
@@ -18,8 +18,8 @@ Aplikace pro dotykový kiosek běžící na Raspberry Pi 5. Seznamuje návštěv
 
 2.  **Klonování repozitáře:**
     ```bash
-    git clone [https://github.com/vase-jmeno/spoznejte-karlov.git](https://github.com/vase-jmeno/spoznejte-karlov.git)
-    cd spoznejte-karlov
+    git clone [https://github.com/vase-jmeno/poznejte-karlov.git](https://github.com/vase-jmeno/poznejte-karlov.git)
+    cd poznejte-karlov
     ```
 
 3.  **Spuštění:**
@@ -34,7 +34,7 @@ Na Raspberry Pi 5 (Wayland/Wayfire) je postup odlišný od starších verzí X11
 1.  Vytvořte soubor pro autostart v `~/.config/wayfire.ini` (nebo odpovídající konfiguraci desktopu):
     ```ini
     [autostart]
-    kiosk_app = python3 /home/pi/spoznejte-karlov/main.py
+    kiosk_app = python3 /home/pi/poznejte-karlov/main.py
     ```
 
 2.  **Alternativní metoda (Systemd Service - doporučeno pro stabilitu):**
@@ -47,7 +47,7 @@ Na Raspberry Pi 5 (Wayland/Wayfire) je postup odlišný od starších verzí X11
     [Service]
     User=pi
     Environment=DISPLAY=:0
-    ExecStart=/usr/bin/python3 /home/pi/spoznejte-karlov/main.py
+    ExecStart=/usr/bin/python3 /home/pi/poznejte-karlov/main.py
     Restart=always
     RestartSec=3
 
